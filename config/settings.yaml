@@ -1,0 +1,52 @@
+timezone: America/New_York
+universe: sp500
+benchmark: SPY
+research_count: 6
+screen_count: 25
+history_period: 1y
+
+screen:
+  minimum_price: 5.0
+  minimum_avg_dollar_volume: 20000000
+  minimum_history_days: 200
+  weights:
+    momentum_1m: 0.10
+    momentum_3m: 0.20
+    momentum_6m: 0.25
+    momentum_12m: 0.20
+    trend: 0.15
+    liquidity: 0.05
+    low_volatility: 0.05
+
+portfolio:
+  starting_cash: 100000.0
+  minimum_cash_weight: 0.10
+  maximum_position_weight: 0.10
+  maximum_daily_turnover: 0.15
+  minimum_trade_weight: 0.005
+  maximum_new_buys_per_day: 3
+
+report:
+  title: Daily Equity Research Report
+  include_watchlist: true
+  max_watchlist_rows: 10
+  max_detail_companies: 8
+  chart_months: 12
+
+market_dashboard:
+  indexes:
+    SPY: S&P 500
+    QQQ: Nasdaq 100
+    IWM: Russell 2000
+  sectors:
+    XLK: Technology
+    XLF: Financials
+    XLV: Health Care
+    XLY: Consumer Discretionary
+    XLP: Consumer Staples
+    XLI: Industrials
+    XLE: Energy
+    XLB: Materials
+    XLU: Utilities
+    XLRE: Real Estate
+    XLC: Communication Services

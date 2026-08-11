@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stock-analyst-openclaw"
+version = "0.1.0"
+description = "Read-only daily equity research bot for OpenClaw on Raspberry Pi"
+requires-python = ">=3.11"
+dependencies = [
+  "beautifulsoup4>=4.12",
+  "jinja2>=3.1",
+  "matplotlib>=3.8",
+  "numpy>=1.26",
+  "pandas>=2.2",
+  "pandas-market-calendars>=4.4",
+  "pydantic>=2.7",
+  "python-dotenv>=1.0",
+  "PyYAML>=6.0",
+  "requests>=2.32",
+  "tenacity>=8.3",
+  "yfinance>=0.2.54",
+  "weasyprint>=68"
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.2"]
+
+[project.scripts]
+stock-analyst = "stock_analyst.cli:main"
+
+[tool.setuptools]
+packages = ["stock_analyst"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

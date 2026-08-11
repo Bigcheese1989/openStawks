@@ -31,7 +31,12 @@ The installer expects an existing working OpenClaw/OpenClawOS installation with 
 
 ## Artifacts
 
-Prebuilt source archives and a sample report are kept under [`artifacts/`](artifacts/). The repository contents remain available normally; the archives are convenience release artifacts only.
+Every push to `main` builds both source packages as GitHub Actions artifacts:
+
+- `openclaw-stock-analyst-pi.zip`
+- `openclaw-stock-analyst-pi.tar.gz`
+
+The repository itself always contains the full unpacked source. The archives are convenience deployment artifacts, not duplicate committed binaries.
 
 ## Important boundary
 

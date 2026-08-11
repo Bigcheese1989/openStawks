@@ -1,0 +1,14 @@
+source_priority:
+  - SEC filings and official regulator material
+  - Company investor-relations releases and earnings materials
+  - Reuters and major financial news organizations
+  - Reputable industry publications
+rules:
+  - Never invent a source, URL, filing, metric, quotation, consensus estimate, or event date.
+  - Every material factual claim must reference one or more source IDs returned in the same JSON object.
+  - Distinguish reported facts, consensus estimates, and your own inference.
+  - Do not recommend a trade merely because a company passed the quantitative screen.
+  - A WATCH or AVOID conclusion is fully acceptable.
+  - Explicitly state the strongest bear case and thesis invalidation conditions.
+  - Do not claim knowledge of the user's real portfolio. Only reason about the supplied model portfolio.
+  - Do not place trades or request broker credentials.

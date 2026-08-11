@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{{ title }} — {{ report_date }}</title>
+<style>
+  @page { size: A4; margin: 14mm 13mm 15mm 13mm; }
+  * { box-sizing: border-box; }
+  body { font-family: Arial, Helvetica, sans-serif; color: #172033; margin: 0; font-size: 10.5pt; line-height: 1.42; }
+  h1, h2, h3 { margin: 0 0 8px; color: #111827; }
+  h1 { font-size: 23pt; letter-spacing: -0.4px; }
+  h2 { font-size: 16pt; margin-top: 6px; padding-bottom: 5px; border-bottom: 1px solid #d8dee9; }
+  h3 { font-size: 12pt; margin-top: 12px; }
+  p { margin: 5px 0 9px; }
+  .muted { color: #64748b; }
+  .small { font-size: 8.5pt; }
+  .kicker { text-transform: uppercase; letter-spacing: 1.2px; font-size: 8pt; font-weight: bold; color: #64748b; }
+  .hero { padding: 6mm 0 5mm; }
+  .stance { display: inline-block; padding: 5px 9px; border: 1px solid #cbd5e1; border-radius: 5px; font-weight: bold; text-transform: capitalize; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .card { border: 1px solid #d8dee9; border-radius: 7px; padding: 10px 12px; break-inside: avoid; }
+  .action { font-size: 12pt; font-weight: bold; }
+  .buy { color: #166534; } .reduce, .exit { color: #991b1b; } .watch, .hold { color: #334155; }
+  table { width: 100%; border-collapse: collapse; margin: 7px 0 12px; }
+  th { text-align: left; color: #475569; font-size: 8.5pt; text-transform: uppercase; letter-spacing: .35px; border-bottom: 1px solid #cbd5e1; padding: 5px 4px; }
+  td { border-bottom: 1px solid #e5e7eb; padding: 5px 4px; vertical-align: top; }
+  td.num, th.num { text-align: right; }
+  ul { margin: 4px 0 9px 19px; padding: 0; }
+  li { margin: 3px 0; }
+  img.chart { width: 100%; max-height: 115mm; object-fit: contain; margin: 5px 0 8px; }
+  img.chart.smallchart { max-height: 70mm; }
+  .company { break-before: page; }
+  .section { break-before: page; }
+  .nobreak { break-inside: avoid; }
+  .score { font-weight: bold; font-size: 15pt; }
+  .pill { display: inline-block; border: 1px solid #cbd5e1; border-radius: 999px; padding: 2px 7px; margin-right: 4px; font-size: 8.5pt; }
+  .source { overflow-wrap: anywhere; font-size: 8.2pt; }
+  .footer-note { margin-top: 14px; padding-top: 8px; border-top: 1px solid #cbd5e1; color: #64748b; font-size: 8pt; }
+</style>
+</head>
+<body>
+<section class="hero">
+  <div class="kicker">Automated read-only equity research</div>
+  <h1>{{ title }}</h1>
+  <p class="muted">{{ report_date.strftime('%A, %B %d, %Y') }}</p>
+  <p><span class="stance">{{ decision.market_stance.replace('_', ' ') }}</span></p>
+  <h3>Executive summary</h3>
+  <p>{{ decision.executive_summary }}</p>
+
+  <div class="grid">
+    <div class="card">
+      <div class="kicker">Top opportunity</div>
+      <div class="score">{{ decision.top_opportunity or 'No high-conviction opportunity' }}</div>
+    </div>
+    <div class="card">
+      <div class="kicker">Model portfolio</div>
+      <div class="score">{{ portfolio_after.equity | usd }}</div>
+      <div class="muted">Cash {{ (portfolio_after.cash / portfolio_after.equity if portfolio_after.equity else 0) | pct }}</div>
+    </div>
+  </div>
+
+  <h3>Today's model-portfolio actions</h3>
+  {% if trades %}
+  <table>
+    <thead><tr><th>Ticker</th><th>Action</th><th class="num">Shares</th><th class="num">Reference price</th><th class="num">Model notional</th></tr></thead>
+    <tbody>
+    {% for t in trades %}
+      <tr><td><b>{{ t.ticker }}</b></td><td class="{{ t.side.lower() }}">{{ t.side }}</td><td class="num">{{ '%.3f'|format(t.shares) }}</td><td class="num">{{ t.price|usd }}</td><td class="num">{{ t.notional|usd }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="card"><b>NO CHANGE.</b> The committee did not identify a model-portfolio change strong enough to pass the configured constraints.</div>
+  {% endif %}
+
+  <h3>Key market risks</h3>
+  <ul>{% for item in decision.key_market_risks %}<li>{{ item }}</li>{% endfor %}</ul>
+</section>
+
+<section class="section">
+  <h2>Market dashboard</h2>
+  {% if charts.market %}<img class="chart" src="{{ charts.market }}">{% endif %}
+  {% if charts.sectors %}<img class="chart" src="{{ charts.sectors }}">{% endif %}
+  {% if charts.ranking %}<img class="chart" src="{{ charts.ranking }}">{% endif %}
+  <p class="small muted">Quantitative ranking is a deterministic shortlist based on momentum, trend, liquidity and volatility. It is not the final investment conclusion.</p>
+</section>
+
+<section class="section">
+  <h2>Model portfolio</h2>
+  {% if charts.allocation %}<img class="chart" src="{{ charts.allocation }}">{% endif %}
+  {% if charts.equity %}<img class="chart" src="{{ charts.equity }}">{% endif %}
+  <table>
+    <thead><tr><th>Ticker</th><th class="num">Shares</th><th class="num">Price</th><th class="num">Value</th><th class="num">Weight</th></tr></thead>
+    <tbody>
+    {% for p in portfolio_after.positions %}
+      <tr><td><b>{{ p.ticker }}</b></td><td class="num">{{ '%.3f'|format(p.shares) }}</td><td class="num">{{ p.price|usd }}</td><td class="num">{{ p.value|usd }}</td><td class="num">{{ p.weight|pct }}</td></tr>
+    {% endfor %}
+      <tr><td><b>Cash</b></td><td></td><td></td><td class="num">{{ portfolio_after.cash|usd }}</td><td class="num">{{ (portfolio_after.cash / portfolio_after.equity if portfolio_after.equity else 0)|pct }}</td></tr>
+    </tbody>
+  </table>
+</section>
+
+{% for r in details %}
+<section class="company">
+  <div class="kicker">Company research</div>
+  <h2>{{ r.ticker }}{% if r.company_name %} — {{ r.company_name }}{% endif %}</h2>
+  <p>
+    <span class="pill"><b>{{ r.conclusion }}</b></span>
+    <span class="pill">Composite {{ r.score.composite }}</span>
+    <span class="pill">Confidence {{ r.confidence|pct }}</span>
+    {% if r.sector %}<span class="pill">{{ r.sector }}</span>{% endif %}
+  </p>
+  <p>{{ r.summary }}</p>
+  {% if charts.companies.get(r.ticker) %}<img class="chart smallchart" src="{{ charts.companies.get(r.ticker) }}">{% endif %}
+  {% if charts.scores.get(r.ticker) %}<img class="chart smallchart" src="{{ charts.scores.get(r.ticker) }}">{% endif %}
+
+  <div class="grid">
+    <div class="card">
+      <h3>Investment thesis</h3>
+      <ul>{% for x in r.thesis %}<li>{{ x.text }}{% if x.source_ids %} <span class="small muted">[{{ x.source_ids|join(', ') }}]</span>{% endif %}</li>{% endfor %}</ul>
+    </div>
+    <div class="card">
+      <h3>Bear case / risks</h3>
+      <ul>{% for x in r.risks %}<li>{{ x.text }}{% if x.source_ids %} <span class="small muted">[{{ x.source_ids|join(', ') }}]</span>{% endif %}</li>{% endfor %}</ul>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h3>Catalysts</h3>
+      <ul>{% for x in r.catalysts %}<li>{{ x.text }}{% if x.source_ids %} <span class="small muted">[{{ x.source_ids|join(', ') }}]</span>{% endif %}</li>{% endfor %}</ul>
+    </div>
+    <div class="card">
+      <h3>Thesis invalidation</h3>
+      <ul>{% for x in r.invalidation %}<li>{{ x }}</li>{% endfor %}</ul>
+    </div>
+  </div>
+
+  <h3>Valuation scenarios</h3>
+  <table>
+    <thead><tr><th>Bear</th><th>Base</th><th>Bull</th><th>Currency</th></tr></thead>
+    <tbody><tr><td>{{ r.valuation.bear|usd }}</td><td>{{ r.valuation.base|usd }}</td><td>{{ r.valuation.bull|usd }}</td><td>{{ r.valuation.currency }}</td></tr></tbody>
+  </table>
+  {% if r.valuation.assumptions %}<ul>{% for a in r.valuation.assumptions %}<li>{{ a }}</li>{% endfor %}</ul>{% endif %}
+</section>
+{% endfor %}
+
+<section class="section">
+  <h2>Watchlist and quantitative shortlist</h2>
+  <p><b>Committee watchlist:</b> {{ decision.watchlist|join(', ') if decision.watchlist else 'None' }}</p>
+  <table>
+    <thead><tr><th>Rank</th><th>Ticker</th><th>Name</th><th>Sector</th><th class="num">Price</th><th class="num">Quant score</th><th class="num">1m</th><th class="num">6m</th></tr></thead>
+    <tbody>
+    {% for x in screen_rows %}
+      <tr><td>{{ loop.index }}</td><td><b>{{ x.ticker }}</b></td><td>{{ x.name }}</td><td>{{ x.sector }}</td><td class="num">{{ x.price|usd }}</td><td class="num">{{ x.quant_score|score }}</td><td class="num">{{ x.return_1m|pct }}</td><td class="num">{{ x.return_6m|pct }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="section">
+  <h2>Sources</h2>
+  {% for s in sources %}
+    <p class="source"><b>{{ s.ticker }} {{ s.id }}</b> — {{ s.title }}{% if s.publisher %}, {{ s.publisher }}{% endif %}{% if s.published_at %} ({{ s.published_at }}){% endif %}<br><span class="muted">{{ s.url }}</span></p>
+  {% endfor %}
+  <div class="footer-note">
+    This report is generated by an automated research system from public information and a hypothetical model portfolio. It has no access to a brokerage account and cannot execute trades. Model outputs can be wrong; verify primary sources and make independent investment decisions.
+  </div>
+</section>
+</body>
+</html>
