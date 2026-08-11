@@ -29,14 +29,15 @@ The installer expects an existing working OpenClaw/OpenClawOS installation with 
 - [Methodology](docs/METHODOLOGY.md)
 - [Security model](docs/SECURITY.md)
 
-## Build artifacts
+## Packaged artifacts
 
-The repository always contains the full unpacked source. Every push to `main` also runs **Package source artifacts** and produces two downloadable GitHub Actions artifacts:
+Ready-to-download source packages are committed under [`artifacts/`](artifacts/):
 
-- `openclaw-stock-analyst-pi-zip` containing `openclaw-stock-analyst-pi.zip`
-- `openclaw-stock-analyst-pi-tar-gz` containing `openclaw-stock-analyst-pi.tar.gz`
+- [`openclaw-stock-analyst-pi.zip`](artifacts/openclaw-stock-analyst-pi.zip)
+- [`openclaw-stock-analyst-pi.tar.gz`](artifacts/openclaw-stock-analyst-pi.tar.gz)
+- [`SHA256SUMS`](artifacts/SHA256SUMS)
 
-Open the repository's **Actions** tab, select **Package source artifacts**, then open the latest successful run; the two downloads appear in that run's **Artifacts** section.
+The repository itself contains the same project as normal unpacked source. Every push to `main` also runs **Package source artifacts**, refreshes the committed packages, and exposes the ZIP and TAR.GZ as downloadable GitHub Actions artifacts in that run.
 
 ## Important boundary
 
